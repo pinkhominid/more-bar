@@ -1,29 +1,77 @@
 <!doctype html>
-<html lang="en-GB">
+<html lang="en-US">
 <head>
   <meta charset="utf-8">
   <style>
     body {
-      background: #fafafa;
+      background-color: #212121;
+      color: white;
+    }
+    #start > *,
+    #center > *,
+    #end > *,
+    #more {
+      margin: .25em;
+      padding: .5em;
+      border: .25em solid grey;
+    }
+    #container {
+      position: relative;
+    }
+    #bar {
+      display: flex;
+      overflow: hidden;
+    }
+    #start {
+      display: flex;
+    }
+    #end {
+      margin-left: auto;
+      justify-content: flex-end;
+    }
+    #center {
+      flex-shrink: 100;
     }
   </style>
+  <script type="module">
+    import { MoreBar } from '../index.js';
+
+    const centerMoreBar = new MoreBar(center, centerMore);
+    const endMoreBar = new MoreBar(end, endMore, true);
+    centerMoreBar.init();
+    endMoreBar.init();
+  </script>
 </head>
 <body>
-  <div id="demo"></div>
-
-  <script type="module">
-    import { html, render } from 'lit-html';
-    import '../more-bar.js';
-
-    const title = 'Hello owc World!';
-    render(
-      html`
-        <more-bar .title=${title}>
-          some more light-dom
-        </more-bar>
-      `,
-      document.querySelector('#demo')
-    );
-  </script>
+  <div id=container>
+    <div id=bar>
+      <div id=start>
+        <div>Start1</div>
+        <div>Start2</div>
+        <div>Start3</div>
+        <div>Start4</div>
+        <div>Start5</div>
+        <div>Start6</div>
+      </div>
+      <div id=center>
+        <div id=centerMore>More</div>
+        <div>Center1</div>
+        <div>Center2</div>
+        <div>Center3</div>
+        <div>Center4</div>
+        <div>Center5</div>
+        <div>Center6</div>
+      </div>
+      <div id=end>
+        <div>End1</div>
+        <div>End2</div>
+        <div>End3</div>
+        <div>End4</div>
+        <div>End5</div>
+        <div>End6</div>
+        <div id=endMore>More</div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
