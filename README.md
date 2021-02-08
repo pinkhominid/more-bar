@@ -1,6 +1,6 @@
-# \<more-bar>
+# MoreBar
 
-This webcomponent follows the [open-wc](https://github.com/open-wc/open-wc) recommendation.
+Add responsive behavior to web toolbars.
 
 ## Installation
 ```bash
@@ -10,10 +10,21 @@ npm i more-bar
 ## Usage
 ```html
 <script type="module">
-  import 'more-bar/more-bar.js';
+  import { MoreBar } from 'more-bar';
+
+  const moreBar = new MoreBar(bar, more);
+  moreBar.init();
 </script>
 
-<more-bar></more-bar>
+<div id=bar>
+  <div>Item 1</div>
+  <div>Item 2</div>
+  <div>Item 3</div>
+  <div>Item 4</div>
+  <div>Item 5</div>
+  <div>Item 6</div>
+  <div id=more>More</div>
+</div>
 ```
 
 ## Linting with ESLint, Prettier, and Types
