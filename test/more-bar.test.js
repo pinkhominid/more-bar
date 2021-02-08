@@ -1,31 +1,38 @@
 import { html, fixture, expect } from '@open-wc/testing';
 
-import '../more-bar.js';
+import { MoreBar } from '../index.js';
+
+function getTmpl() {
+  return html`
+    <div id=bar>
+      <div id=more>More</div>
+      <div>Center1</div>
+      <div>Center2</div>
+      <div>Center3</div>
+      <div>Center4</div>
+      <div>Center5</div>
+      <div>Center6</div>
+    </div>
+  `;
+}
+
+async function setupEl() {
+  const el = await fixture(getTmpl());
+  const moreBar = new MoreBar(bar, more);
+  moreBar.init();
+  return el;
+}
 
 describe('MoreBar', () => {
-  it('has a default title "Hey there" and counter 5', async () => {
-    const el = await fixture(html`<more-bar></more-bar>`);
+  it('makes more element last child', async () => {
+    const el = await setupEl();
 
-    expect(el.title).to.equal('Hey there');
-    expect(el.counter).to.equal(5);
-  });
-
-  it('increases the counter on button click', async () => {
-    const el = await fixture(html`<more-bar></more-bar>`);
-    el.shadowRoot.querySelector('button').click();
-
-    expect(el.counter).to.equal(6);
-  });
-
-  it('can override the title via attribute', async () => {
-    const el = await fixture(html`<more-bar title="attribute title"></more-bar>`);
-
-    expect(el.title).to.equal('attribute title');
+    expect(el.lastElementChild).to.equal(more);
   });
 
   it('passes the a11y audit', async () => {
-    const el = await fixture(html`<more-bar></more-bar>`);
+    const el = await setupEl();
 
-    await expect(el).shadowDom.to.be.accessible();
+    await expect(el).dom.to.be.accessible();
   });
 });
