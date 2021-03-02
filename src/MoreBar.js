@@ -1,10 +1,16 @@
+/**
+ * MoreBar
+ * Add responsive behavior to web toolbars
+ * pinkhominid <pinkhominid@birdbomb>
+ * MIT Licensed
+ */
 export class MoreBar {
   constructor(barEl, moreEl, isJustifyEnd = false) {
     if (!barEl || !moreEl) throw new Error('MoreBar: two arguments required!');
 
-    this.__barEl = barEl;
-    this.__moreEl = moreEl;
-    this.__isJustifyEnd = isJustifyEnd;
+    this.barEl = barEl;
+    this.moreEl = moreEl;
+    this.isJustifyEnd = isJustifyEnd;
     this.__onIntersection = this.__onIntersection.bind(this);
   }
 
@@ -13,21 +19,23 @@ export class MoreBar {
   init() {
     this.destroy();
 
-    const barEl = this.__barEl;
-    const moreEl = this.__moreEl;
-    const isJustifyEnd = this.__isJustifyEnd;
+    const barEl = this.barEl;
+    const moreEl = this.moreEl;
+    const isJustifyEnd = this.isJustifyEnd;
 
     // side effects
     barEl.style.display = 'flex'; // IMPORTANT: apply flex before getting moreEl width
-    moreEl.style.position = 'relative';
+    moreEl.style.position = 'static';
     const moreElWidthPlusMargins = getWidthPlusMargins(moreEl);
     this.__hideEl(moreEl);
-    this.__barEl.style.minWidth = moreElWidthPlusMargins + 'px';
-    if (isJustifyEnd) {
-      barEl.insertBefore(moreEl, barEl.firstChild); // move moreEl to first
-    } else {
-      barEl.insertBefore(moreEl, null); // move moreEl to last
-    }
+    this.barEl.style.minWidth = moreElWidthPlusMargins + 'px';
+
+    // move moreEl to proper child position
+    // const barItems = this.barItems;
+    // const lastBarItem = barItems[barItems.length - 1];
+    // if (lastBarItem[`${isJustifyEnd ? 'previous' : 'next'}ElementSibling`] !== moreEl) {
+    //   lastBarItem.insertAdjacentElement(isJustifyEnd ? 'beforebegin' : 'afterend', moreEl);
+    // }
 
     // options
     const itemObserverOpts = {
@@ -54,21 +62,35 @@ export class MoreBar {
     // TODO: revert side effects
   }
 
-  get __barItems() {
-    // except more
-    const items = Array.from(this.__barEl.children).filter(item => item !== this.__moreEl);
-    return this.__isJustifyEnd ? items.reverse() : items;
+  get barItems() {
+    let barChildArry;
+    if (this.barEl.matches('slot')) {
+      barChildArry = this.barEl.assignedElements();
+    } else {
+      barChildArry = Array.from(this.barEl.children);
+    }
+
+    const items = barChildArry.reduce((items, child) => {
+      if (child.matches('slot')) { // use slotted elements
+        items = items.concat(child.assignedElements());
+      } else if (child !== this.moreEl) { // otherwise use element (except more)
+        items.push(child);
+      }
+      return items;
+    }, []);
+
+    return this.isJustifyEnd ? items.reverse() : items;
   }
 
   get __firstHiddenItem() {
-    for (const item of this.__barItems) {
+    for (const item of this.barItems) {
       if (this.__isHidden(item)) return item;
     }
     return undefined;
   }
 
   __observe() {
-    const barItems = this.__barItems;
+    const barItems = this.barItems;
 
     for (const item of barItems) {
       if (item !== barItems[barItems.length - 1]) { // not last item
@@ -97,28 +119,57 @@ export class MoreBar {
   }
 
   __positionMoreItem() {
-    this.__hideEl(this.__moreEl);
-    this.__moreEl.style.transform = '';
+    this.__hideEl(this.moreEl);
+    this.moreEl.style.transform = '';
 
     const firstHiddenItem = this.__firstHiddenItem;
 
     if (firstHiddenItem) {
-      this.__moreEl.style.transform = `
+      this.moreEl.style.transform = `
         translateX(${
-          firstHiddenItem.getBoundingClientRect().left - this.__moreEl.getBoundingClientRect().left
+          firstHiddenItem.getBoundingClientRect().left - this.moreEl.getBoundingClientRect().left
         }px)
       `;
-      this.__showEl(this.__moreEl);
+      this.__showEl(this.moreEl);
+
+      this.barEl.dispatchEvent(new CustomEvent(
+        'morebar-moreitem-show',
+        {
+          bubbles: true,
+          detail: {
+            item: this.moreEl,
+            type: 'show',
+            transform: this.moreEl.style.transform,
+            moreBar: this,
+          }
+        }
+      ));
     }
   }
 
   __onIntersection(entries) {
     for (const entry of entries) {
+      let isShow;
       if (entry.isIntersecting) {
         this.__showEl(entry.target);
+        isShow = true;
       } else {
         this.__hideEl(entry.target);
+        isShow = false;
       }
+
+      this.barEl.dispatchEvent(new CustomEvent(
+        'morebar-item-update',
+        {
+          bubbles: true,
+          detail: {
+            item: entry.target,
+            type: isShow ? 'show' : 'hide',
+            index: this.barItems.indexOf(entry.target),
+            moreBar: this,
+          }
+        }
+      ));
     }
 
     this.__positionMoreItem();
