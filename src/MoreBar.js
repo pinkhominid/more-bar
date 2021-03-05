@@ -125,9 +125,10 @@ export class MoreBar {
     const firstHiddenItem = this.__firstHiddenItem;
 
     if (firstHiddenItem) {
+      const side = this.isJustifyEnd ? 'right' : 'left';
       this.moreEl.style.transform = `
         translateX(${
-          firstHiddenItem.getBoundingClientRect().left - this.moreEl.getBoundingClientRect().left
+          firstHiddenItem.getBoundingClientRect()[side] - this.moreEl.getBoundingClientRect()[side]
         }px)
       `;
       this.__showEl(this.moreEl);
